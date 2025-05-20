@@ -1,0 +1,11 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
+1747682285065,1569,MyFirstHTTPTest,200,OK,Thread Group 1-1,text,true,,6349,136,4,4,https://automationexercise.com/api/productsList,1549,0,557
+1747682285573,1381,MyFirstHTTPTest,200,OK,Thread Group 1-2,text,true,,6343,136,3,3,https://automationexercise.com/api/productsList,1370,0,523
+1747682286074,1382,MyFirstHTTPTest,200,OK,Thread Group 1-3,text,true,,6351,136,3,3,https://automationexercise.com/api/productsList,1381,0,549
+1747682286572,1209,MyFirstHTTPTest,200,OK,Thread Group 1-4,text,true,,6345,136,3,3,https://automationexercise.com/api/productsList,1208,0,358
+1747682287073,1255,MyFirstHTTPTest,200,OK,Thread Group 1-5,text,true,,6347,136,3,3,https://automationexercise.com/api/productsList,1254,0,391
+1747682287581,1308,MyFirstHTTPTest,200,OK,Thread Group 1-6,text,true,,6345,136,3,3,https://automationexercise.com/api/productsList,1307,0,394
+1747682288079,1219,MyFirstHTTPTest,200,OK,Thread Group 1-7,text,true,,6347,136,3,3,https://automationexercise.com/api/productsList,1218,0,356
+1747682288580,1435,MyFirstHTTPTest,200,OK,Thread Group 1-8,text,true,,6349,136,3,3,https://automationexercise.com/api/productsList,1434,0,551
+1747682289082,1751,MyFirstHTTPTest,200,OK,Thread Group 1-9,text,true,,6339,136,2,2,https://automationexercise.com/api/productsList,1548,0,544
+1747682289584,1307,MyFirstHTTPTest,200,OK,Thread Group 1-10,text,true,,6345,136,1,1,https://automationexercise.com/api/productsList,1306,0,442
