@@ -1,0 +1,576 @@
+firstcry-automation/
+│
+├── src/
+│   ├── main/
+│   │   └── java/
+│   │       └── com.firstcry.utilities/       → Excel, Property, Logger, Reports, Screenshot
+│   │       └── com.firstcry.base/            → WebDriver setup, Hooks, Base classes
+│   │       └── com.firstcry.pages/           → POM classes (without PageFactory)
+│
+│   ├── test/
+│   │   └── java/
+│   │       └── com.firstcry.stepdefinitions/ → Cucumber Step Definitions
+│   │       └── com.firstcry.testrunner/      → TestNG + Cucumber Runners
+│   │
+│   └── resources/
+│       └── features/                         → Cucumber .feature files
+│       └── config.properties                 → Credentials, URLs, etc.
+│       └── log4j.properties                  → Logging config
+│       └── testdata/                         → Excel files for test data
+│
+├── test-output/                              → TestNG + Extent reports (auto-created)
+├── pom.xml                                   → All dependencies here
+
+
+#config.properties
+url=https://www.firstcry.com/m/login
+browser=edge
+
+
+package com.firstcry.base;
+
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.edge.EdgeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+
+public class WebDriverManager {
+    
+    private static ThreadLocal<WebDriver> driver = new ThreadLocal<>();
+    
+    public static void setDriver(String browserName) {
+        switch (browserName.toLowerCase()) {
+            case "chrome":
+                driver.set(new ChromeDriver());
+                break;
+            case "edge":
+                driver.set(new EdgeDriver());
+                break;
+            case "firefox":
+                driver.set(new FirefoxDriver());
+                break;
+            default:
+                throw new RuntimeException("Browser not supported: " + browserName);
+        }
+        getDriver().manage().window().maximize();
+    }
+    
+    public static WebDriver getDriver() {
+        return driver.get();
+    }
+    
+    public static void quitDriver() {
+        if (getDriver() != null) {
+            getDriver().quit();
+            driver.remove();
+        }
+    }
+}
+
+package com.firstcry.base;
+
+import org.openqa.selenium.WebDriver;
+import com.firstcry.utilities.ConfigReader;
+
+public class BaseTest {
+    
+    protected WebDriver driver;
+    
+    public void setUp() {
+        String browser = ConfigReader.getBrowser();
+        WebDriverManager.setDriver(browser);
+        driver = WebDriverManager.getDriver();
+        driver.get(ConfigReader.getUrl());
+    }
+    
+    public void tearDown() {
+        WebDriverManager.quitDriver();
+    }
+    
+    public WebDriver getDriver() {
+        return WebDriverManager.getDriver();
+    }
+}
+
+package com.firstcry.base;
+
+import io.cucumber.java.After;
+import io.cucumber.java.Before;
+import com.firstcry.utilities.ConfigReader;
+
+public class Hooks {
+    
+    @Before
+    public void setUp() {
+        System.out.println("Setting up WebDriver...");
+        String browser = ConfigReader.getBrowser();
+        WebDriverManager.setDriver(browser);
+        WebDriverManager.getDriver().get(ConfigReader.getUrl());
+        System.out.println("WebDriver setup completed.");
+    }
+    
+    @After
+    public void tearDown() {
+        System.out.println("Tearing down WebDriver...");
+        WebDriverManager.quitDriver();
+    }
+}
+
+package com.firstcry.utilities;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
+public class ConfigReader {
+    
+    private static Properties properties;
+    
+    static {
+        loadProperties();
+    }
+    
+    private static void loadProperties() {
+        try {
+            properties = new Properties();
+            // Try to load from resources first
+            InputStream inputStream = ConfigReader.class.getClassLoader().getResourceAsStream("config.properties");
+            if (inputStream != null) {
+                properties.load(inputStream);
+                inputStream.close();
+            } else {
+                // Fallback to file path
+                FileInputStream fis = new FileInputStream("src/resources/config.properties");
+                properties.load(fis);
+                fis.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to load config.properties file");
+        }
+    }
+    
+    public static String getProperty(String key) {
+        return properties.getProperty(key);
+    }
+    
+    public static String getUrl() {
+        return getProperty("url");
+    }
+    
+    public static String getBrowser() {
+        return getProperty("browser");
+    }
+}
+
+package com.fristcry.pages;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+
+public class LoginPage {
+    WebDriver wd;
+
+    By mobileNO = By.xpath("//input[@id='lemail']");
+    By submit = By.xpath("//span[text()='CONTINUE']");
+    By otpSubmit = By.xpath("//div[@class='loginSignup_submitOtpBtn_block bg_ff btn_fill']");
+
+    public LoginPage(WebDriver wd) {
+        this.wd = wd;
+    }
+
+    public void enterMobileNo(String mobileNo) {
+        wd.findElement(mobileNO).sendKeys(mobileNo);
+    }
+
+    public void clickContinue() throws InterruptedException {
+        Thread.sleep(3000);
+        wd.findElement(submit).click();
+    }
+    
+    public void submitOTP() throws InterruptedException
+    {
+    	Thread.sleep(30000);
+    	wd.findElement(otpSubmit).click();
+    	Thread.sleep(5000);
+    }
+}
+
+package com.fristcry.pages;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+
+public class LoginPage {
+    WebDriver wd;
+
+    By mobileNO = By.xpath("//input[@id='lemail']");
+    By submit = By.xpath("//span[text()='CONTINUE']");
+    By otpSubmit = By.xpath("//div[@class='loginSignup_submitOtpBtn_block bg_ff btn_fill']");
+
+    public LoginPage(WebDriver wd) {
+        this.wd = wd;
+    }
+
+    public void enterMobileNo(String mobileNo) {
+        wd.findElement(mobileNO).sendKeys(mobileNo);
+    }
+
+    public void clickContinue() throws InterruptedException {
+        Thread.sleep(3000);
+        wd.findElement(submit).click();
+    }
+    
+    public void submitOTP() throws InterruptedException
+    {
+    	Thread.sleep(30000);
+    	wd.findElement(otpSubmit).click();
+    	Thread.sleep(5000);
+    }
+}
+
+package com.fristcry.pages;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import java.time.Duration;
+
+public class StoreLocatorPage {
+
+    WebDriver driver;
+    WebDriverWait wait;
+
+    By storeTypeDropdown = By.xpath("//select[@id='storetype']");
+    By stateDropdown = By.xpath("//select[@name='state']");
+    By cityDropdown = By.xpath("//select[@name='city']");
+    By searchButton = By.xpath("//input[@type='button']");
+    By verifystoreLocator = By.xpath("//span[@class='p1']");
+    By verifystores = By.xpath("//label[@id='citynme']");
+    By storesAndPreschools = By.xpath("//span[text()='Stores & Preschools']");
+    By findPreschools = By.xpath("//a[@href='https://www.firstcry.com/intelli/intellitots/preschool-near-you/?ref2=topstrip']");
+    By errorMsg = By.xpath("//span[text()='Please Select Store Type']");
+
+    public StoreLocatorPage(WebDriver driver) {
+        this.driver = driver;
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+    }
+
+    public String verifyStorePage() {
+        String actual = driver.findElement(verifystoreLocator).getText();
+        return actual;
+    }
+
+    public void selectStoreType(String storeType) {
+        Select select = new Select(driver.findElement(storeTypeDropdown));
+        select.selectByVisibleText(storeType);
+    }
+
+    public void selectState(String state) {
+        Select select = new Select(driver.findElement(stateDropdown));
+        select.selectByVisibleText(state);
+    }
+
+    public void selectCity(String city) {
+        Select select = new Select(driver.findElement(cityDropdown));
+        select.selectByVisibleText(city);
+    }
+
+    public void clickSearch() {
+        driver.findElement(searchButton).click();
+    }
+
+    public String verifyStore() {
+        String actual = driver.findElement(verifystores).getText();
+        return actual;
+    }
+
+    public void hoverOverStoreAndPreschool() throws InterruptedException {
+        WebElement storesPreschool = wait.until(ExpectedConditions.elementToBeClickable(storesAndPreschools));
+
+        Actions a = new Actions(driver);
+        a.moveToElement(storesPreschool).perform();
+
+        WebElement findPreschool = wait.until(ExpectedConditions.elementToBeClickable(findPreschools));
+        a.moveToElement(findPreschool).click().perform();
+    }
+    
+    public String verifyError()
+    {
+        WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(errorMsg));
+        String actual = element.getText();
+        return actual;
+    }
+}
+
+
+package com.fristcry.pages;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import java.time.Duration;
+
+public class PreschoolLocatorPage {
+
+    WebDriver driver;
+    WebDriverWait wait;
+
+    By verifyPreschoolPage = By.xpath("//*[@id=\"scrollHeight\"]/app-locator-listing/div[2]/div/h2");
+    By pincodeInput = By.xpath("//*[@id=\"scrollHeight\"]/app-locator-listing/div[2]/div/div[2]/div[1]/input");
+    By submitButton = By.xpath("//*[@id=\"scrollHeight\"]/app-locator-listing/div[2]/div/div[2]/div[2]/button/div");
+    By errorMessage = By.xpath("//span[text()='Ooopss…']"); 
+    By verifyPreschool = By.xpath("//p[text()='Preschools Near You ']");
+
+    public PreschoolLocatorPage(WebDriver driver) {
+        this.driver = driver;
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+    }
+
+    public String verifyPreschoolLocator() {
+        WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(verifyPreschoolPage));
+        String actual = element.getText();
+        return actual;
+    }
+
+    public void enterPincode(String pincode) {
+        WebElement pincodeField = wait.until(ExpectedConditions.elementToBeClickable(pincodeInput));
+        pincodeField.clear();
+        pincodeField.sendKeys(pincode);
+    }
+
+    public void clickSubmit() {
+        WebElement submitBtn = wait.until(ExpectedConditions.elementToBeClickable(submitButton));
+        submitBtn.click();
+    }
+
+    public boolean isSubmitDisabled() {
+        return !driver.findElement(submitButton).isEnabled();
+    }
+
+    public String verifyPreschool() {
+        WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(verifyPreschool));
+        String actual = element.getText();
+        return actual;
+    }
+    
+    public String verifyInvalidError()
+    {
+        WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(errorMessage));
+        String actual = element.getText();
+        return actual;
+    }
+}
+
+@valid @regression
+Feature: Valid FirstCry Automation Flow
+
+  Background:
+    Given User launches the FirstCry application
+    And User enters mobile number "7004481495" and logs in
+
+  Scenario: Navigate from Store Locator to Preschool Locator with valid inputs
+    When User navigates to Store Locator page
+    And User selects store type "FirstCry", state "Maharashtra" and city "Pune Kharadi"
+    And User clicks on Search button
+    Then Store name should be displayed
+    When User navigates to Preschool Locator page
+    And User enters pincode "411014"
+    Then Preschool information should be displayed
+
+@invalid @regression
+Feature: Invalid FirstCry Input Handling
+
+  Background:
+    Given User launches the FirstCry application
+    And User enters mobile number "7004481495" and logs in
+
+  Scenario: Navigate through Store Locator and Preschool Locator with invalid inputs
+    When User navigates to Store Locator page
+    And User clicks on Search button without selecting dropdowns
+    Then Error message "Please Select Store Type" should be displayed
+    When User navigates to Preschool Locator page
+    And User enters pincode "633456"
+    Then Error message "Ooopss…" should be displayed
+
+package com.firstcry.stepdefinitions;
+
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.When;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.And;
+
+import org.openqa.selenium.WebDriver;
+import org.testng.Assert;
+
+import com.firstcry.base.WebDriverManager;
+import com.fristcry.pages.HomePage;
+import com.fristcry.pages.LoginPage;
+import com.fristcry.pages.PreschoolLocatorPage;
+import com.fristcry.pages.StoreLocatorPage;
+
+import java.util.ArrayList;
+
+public class StepDefinitions {
+    
+    private WebDriver driver;
+    private LoginPage loginPage;
+    private HomePage homePage;
+    private StoreLocatorPage storeLocatorPage;
+    private PreschoolLocatorPage preschoolLocatorPage;
+    
+    @Given("User launches the FirstCry application")
+    public void user_launches_the_first_cry_application() {
+        System.out.println("Getting WebDriver from WebDriverManager...");
+        driver = WebDriverManager.getDriver();
+        if (driver == null) {
+            throw new RuntimeException("WebDriver is null! Make sure Hooks are running properly.");
+        }
+        System.out.println("WebDriver obtained successfully: " + driver.getClass().getSimpleName());
+        loginPage = new LoginPage(driver);
+        System.out.println("LoginPage initialized successfully.");
+    }
+    
+    @And("User enters mobile number {string} and logs in")
+    public void user_enters_mobile_number_and_logs_in(String mobileNumber) throws InterruptedException {
+        loginPage.enterMobileNo(mobileNumber);
+        loginPage.clickContinue();
+        loginPage.submitOTP();
+        homePage = new HomePage(driver);
+    }
+    
+    @When("User navigates to Store Locator page")
+    public void user_navigates_to_store_locator_page() throws InterruptedException {
+        homePage.hoverOverStoreAndPreschool();
+        
+        // Switch to Store Locator tab
+        ArrayList<String> tabs = new ArrayList<>(driver.getWindowHandles());
+        driver.switchTo().window(tabs.get(1));
+        
+        storeLocatorPage = new StoreLocatorPage(driver);
+        
+        // Verify Store Locator page is loaded
+        String actualPageTitle = storeLocatorPage.verifyStorePage();
+        Assert.assertEquals(actualPageTitle, "Store Locator", "Store Locator page not loaded correctly");
+    }
+    
+    @And("User selects store type {string}, state {string} and city {string}")
+    public void user_selects_store_type_state_and_city(String storeType, String state, String city) {
+        storeLocatorPage.selectStoreType(storeType);
+        storeLocatorPage.selectState(state);
+        storeLocatorPage.selectCity(city);
+    }
+    
+    @And("User clicks on Search button")
+    public void user_clicks_on_search_button() {
+        storeLocatorPage.clickSearch();
+    }
+    
+    @Then("Store name should be displayed")
+    public void store_name_should_be_displayed() {
+        String actualStoreName = storeLocatorPage.verifyStore();
+        Assert.assertNotNull(actualStoreName, "Store name is not displayed");
+        Assert.assertFalse(actualStoreName.trim().isEmpty(), "Store name is empty");
+        System.out.println("Store found: " + actualStoreName);
+    }
+    
+    @And("User clicks on Search button without selecting dropdowns")
+    public void user_clicks_on_search_button_without_selecting_dropdowns() {
+        storeLocatorPage.clickSearch();
+    }
+    
+    @Then("Error message {string} should be displayed")
+    public void error_message_should_be_displayed(String expectedErrorMessage) {
+        String actualErrorMessage;
+        
+
+        if (expectedErrorMessage.equals("Please Select Store Type")) {
+
+            if (storeLocatorPage == null) {
+                throw new RuntimeException("Store Locator page is not initialized");
+            }
+            actualErrorMessage = storeLocatorPage.verifyError();
+        } else if (expectedErrorMessage.equals("Ooopss…")) {
+ 
+            if (preschoolLocatorPage == null) {
+                throw new RuntimeException("Preschool Locator page is not initialized");
+            }
+            actualErrorMessage = preschoolLocatorPage.verifyInvalidError();
+        } else {
+            throw new RuntimeException("Unexpected error message: " + expectedErrorMessage);
+        }
+        
+        Assert.assertEquals(actualErrorMessage, expectedErrorMessage, 
+            "Error message does not match expected message");
+        System.out.println("Error message verified: " + actualErrorMessage);
+    }
+    
+    @When("User navigates to Preschool Locator page")
+    public void user_navigates_to_preschool_locator_page() throws InterruptedException {
+
+        if (storeLocatorPage != null) {
+            storeLocatorPage.hoverOverStoreAndPreschool();
+        } else {
+
+            homePage.hoverOverStoreAndPreschool();
+        }
+        
+
+        ArrayList<String> tabs = new ArrayList<>(driver.getWindowHandles());
+//        driver.switchTo().window(tabs.get(tabs.size() - 1));
+        driver.switchTo().window(tabs.get(2));
+        
+        preschoolLocatorPage = new PreschoolLocatorPage(driver);
+        
+
+        String actualPageTitle = preschoolLocatorPage.verifyPreschoolLocator();
+        Assert.assertEquals(actualPageTitle, "Preschool Locator", "Preschool Locator page not loaded correctly");
+    }
+    
+    @And("User enters pincode {string}")
+    public void user_enters_pincode(String pincode) {
+        preschoolLocatorPage.enterPincode(pincode);
+        preschoolLocatorPage.clickSubmit();
+    }
+    
+    @Then("Preschool information should be displayed")
+    public void preschool_information_should_be_displayed() {
+        String actualPreschoolInfo = preschoolLocatorPage.verifyPreschool();
+        Assert.assertEquals(actualPreschoolInfo, "Preschools Near You", 
+            "Preschool information is not displayed correctly");
+        System.out.println("Preschool information displayed: " + actualPreschoolInfo);
+    }
+}
+
+package com.firstcry.runner;
+
+import io.cucumber.testng.AbstractTestNGCucumberTests;
+import io.cucumber.testng.CucumberOptions;
+
+
+@CucumberOptions(
+		features = {"./src/resources/features/InvalidFirstCryFlow.feature",
+				"./src/resources/features/ValidFirstCryFlow.feature"},
+		glue = {"com.firstcry.stepdefinitions", "com.firstcry.base"},
+		plugin = {
+				"pretty",
+				"html:target/cucumber-reports"},
+		monochrome = true,
+		tags = "@valid"
+		)
+public class TestRunner extends AbstractTestNGCucumberTests {
+
+}
+
+
+
+
+
