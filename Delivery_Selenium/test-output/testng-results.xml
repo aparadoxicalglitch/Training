@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testng-results ignored="2" total="3" passed="1" failed="0" skipped="0">
+  <reporter-output>
+  </reporter-output>
+  <suite started-at="2025-06-01T23:25:44 IST" name="Default suite" finished-at="2025-06-01T23:26:21 IST" duration-ms="37506">
+    <groups>
+    </groups>
+    <test started-at="2025-06-01T23:25:44 IST" name="Default test" finished-at="2025-06-01T23:26:21 IST" duration-ms="37506">
+      <class name="Test.NewTest">
+        <test-method signature="herokuapp()[pri:0, instance:Test.NewTest@4d5d943d]" started-at="2025-06-01T23:25:44 IST" name="herokuapp" finished-at="2025-06-01T23:26:21 IST" duration-ms="37397" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- herokuapp -->
+      </class> <!-- Test.NewTest -->
+    </test> <!-- Default test -->
+  </suite> <!-- Default suite -->
+</testng-results>
